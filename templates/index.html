@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>財經新聞網站 - 印度與東南亞新聞聚合</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- 頁面標題 -->
+        <header class="header">
+            <h1>📰 財經新聞網站</h1>
+            <p>印度與東南亞地區最新財經新聞聚合平台</p>
+        </header>
+
+        <!-- 篩選器區域 -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="country-select">選擇國家：</label>
+                <select id="country-select">
+                    <option value="">-- 請選擇國家 --</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="topic-select">選擇主題：</label>
+                <select id="topic-select">
+                    <option value="finance">財經</option>
+                    <option value="business">商業</option>
+                    <option value="economy">經濟</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="max-articles">返回數量：</label>
+                <input type="number" id="max-articles" value="10" min="1" max="100">
+            </div>
+
+            <button id="search-btn" class="btn btn-primary">搜尋新聞</button>
+            <div id="loading" class="loading" style="display: none;">
+                <span class="spinner"></span> 正在載入新聞...
+            </div>
+        </div>
+
+        <!-- 錯誤訊息區域 -->
+        <div id="error-message" class="error-message" style="display: none;"></div>
+
+        <!-- 新聞列表區域 -->
+        <div class="news-section">
+            <h2>新聞列表</h2>
+            <div id="news-container" class="news-container">
+                <p class="placeholder">請選擇國家並點擊「搜尋新聞」按鈕開始</p>
+            </div>
+        </div>
+
+        <!-- 頁腳 -->
+        <footer class="footer">
+            <p>資料來源：GNews API | 更新時間：<span id="update-time">--</span></p>
+            <p>© 2026 財經新聞網站。版權所有。</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

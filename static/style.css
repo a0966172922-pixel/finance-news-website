@@ -1,0 +1,375 @@
+/* ========== 全域樣式 ========== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* ========== 頁面標題 ========== */
+
+.header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px 30px;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.header p {
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+/* ========== 篩選器區域 ========== */
+
+.filter-section {
+    background: #f8f9fa;
+    padding: 25px 30px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95em;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.95em;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.filter-group select:hover,
+.filter-group input:hover {
+    border-color: #667eea;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ========== 按鈕樣式 ========== */
+
+.btn {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* ========== 載入動畫 ========== */
+
+.loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========== 錯誤訊息 ========== */
+
+.error-message {
+    background: #fee;
+    border-left: 4px solid #f44;
+    color: #c33;
+    padding: 15px 20px;
+    margin: 20px 30px;
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+/* ========== 新聞區域 ========== */
+
+.news-section {
+    padding: 30px;
+}
+
+.news-section h2 {
+    font-size: 1.8em;
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 10px;
+}
+
+.news-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* ========== 新聞卡片 ========== */
+
+.news-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+
+
+.news-card-content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-card-title {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    min-height: 2.8em;
+}
+
+.news-card-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85em;
+    color: #999;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.news-card-source {
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+    color: #667eea;
+}
+
+.news-card-date {
+    color: #999;
+}
+
+.news-card-description {
+    font-size: 0.95em;
+    color: #666;
+    margin-bottom: 12px;
+    line-height: 1.6;
+    flex-grow: 1;
+}
+
+.news-card-description-chinese {
+    font-size: 0.95em;
+    color: #555;
+    margin-bottom: 15px;
+    line-height: 1.6;
+    background: #f9f9f9;
+    padding: 10px;
+    border-left: 3px solid #667eea;
+    border-radius: 3px;
+    font-weight: 500;
+}
+
+.news-card-footer {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 15px;
+}
+
+.news-card-link {
+    display: inline-block;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+    word-break: break-all;
+    font-size: 0.9em;
+}
+
+.news-card-link:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+/* ========== 佔位符 ========== */
+
+.placeholder {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+    font-size: 1.1em;
+}
+
+/* ========== 頁腳 ========== */
+
+.footer {
+    background: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+    padding: 20px 30px;
+    text-align: center;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.footer p {
+    margin: 5px 0;
+}
+
+/* ========== 響應式設計 ========== */
+
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 1.8em;
+    }
+
+    .header p {
+        font-size: 0.95em;
+    }
+
+    .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-group select,
+    .filter-group input {
+        width: 100%;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .news-container {
+        grid-template-columns: 1fr;
+    }
+
+    .news-section {
+        padding: 20px;
+    }
+
+    .news-section h2 {
+        font-size: 1.4em;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        border-radius: 5px;
+    }
+
+    .header {
+        padding: 25px 15px;
+    }
+
+    .header h1 {
+        font-size: 1.5em;
+    }
+
+    .filter-section {
+        padding: 15px;
+    }
+
+    .news-card-content {
+        padding: 15px;
+    }
+
+    .news-card-title {
+        font-size: 1em;
+    }
+
+    .footer {
+        padding: 15px;
+        font-size: 0.85em;
+    }
+}
