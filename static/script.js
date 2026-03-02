@@ -1,6 +1,7 @@
 /**
  * 財經新聞網站前端 JavaScript
  * 負責與後端 API 通訊和動態更新頁面
+ * 支持異步翻譯和漸進式加載
  */
 
 // ========== 全域變數 ========== 
@@ -8,6 +9,7 @@
 // 使用相對路徑以支持跨域
 const API_BASE_URL = window.location.origin;
 let currentNews = [];
+let translationPollingIntervals = {}; // 存儲輪詢計時器
 
 // ========== 初始化 ========== 
 
@@ -73,6 +75,9 @@ async function searchNews() {
         return;
     }
     
+    // 停止之前的輪詢
+    stopAllPolling();
+    
     // 顯示載入狀態
     showLoading(true);
     hideError();
@@ -98,6 +103,10 @@ async function searchNews() {
         if (data.success) {
             currentNews = data.articles || [];
             displayNews(data);
+            
+            // 開始輪詢翻譯結果
+            startTranslationPolling(data.articles);
+            
             console.log(`成功載入 ${currentNews.length} 篇新聞`);
         } else {
             throw new Error(data.error || '無法載入新聞');
@@ -110,6 +119,116 @@ async function searchNews() {
     } finally {
         showLoading(false);
     }
+}
+
+// ========== 輪詢翻譯結果 ========== 
+
+function startTranslationPolling(articles) {
+    /**
+     * 開始輪詢翻譯結果
+     * 每 2 秒檢查一次是否有新的翻譯完成
+     */
+    
+    // 收集所有需要翻譯的文章 ID
+    const articleIds = articles
+        .filter(article => !article.chinese_description)
+        .map(article => article.article_id);
+    
+    if (articleIds.length === 0) {
+        console.log('所有文章都已翻譯');
+        return;
+    }
+    
+    console.log(`開始輪詢 ${articleIds.length} 篇文章的翻譯結果`);
+    
+    // 設置輪詢計時器
+    const pollingKey = `poll_${Date.now()}`;
+    let pollCount = 0;
+    const maxPolls = 60; // 最多輪詢 60 次（2 秒 × 60 = 120 秒 = 2 分鐘）
+    
+    translationPollingIntervals[pollingKey] = setInterval(async () => {
+        pollCount++;
+        
+        try {
+            // 獲取翻譯結果
+            const url = new URL(`${API_BASE_URL}/api/translations`);
+            url.searchParams.append('article_ids', articleIds.join(','));
+            
+            const response = await fetch(url.toString());
+            
+            if (!response.ok) {
+                console.warn('獲取翻譯結果失敗');
+                return;
+            }
+            
+            const data = await response.json();
+            
+            if (data.success && data.translations) {
+                console.log(`收到 ${data.total_translated} 篇翻譯結果`);
+                
+                // 更新頁面上的翻譯
+                updateTranslations(data.translations);
+                
+                // 如果所有翻譯都完成，停止輪詢
+                if (data.total_translated === articleIds.length) {
+                    console.log('所有翻譯已完成');
+                    clearInterval(translationPollingIntervals[pollingKey]);
+                    delete translationPollingIntervals[pollingKey];
+                }
+            }
+            
+        } catch (error) {
+            console.error('輪詢翻譯結果失敗:', error);
+        }
+        
+        // 如果達到最大輪詢次數，停止
+        if (pollCount >= maxPolls) {
+            console.log('輪詢已達最大次數，停止');
+            clearInterval(translationPollingIntervals[pollingKey]);
+            delete translationPollingIntervals[pollingKey];
+        }
+        
+    }, 2000); // 每 2 秒輪詢一次
+}
+
+function stopAllPolling() {
+    /**
+     * 停止所有正在進行的輪詢
+     */
+    Object.keys(translationPollingIntervals).forEach(key => {
+        clearInterval(translationPollingIntervals[key]);
+        delete translationPollingIntervals[key];
+    });
+    console.log('已停止所有輪詢');
+}
+
+function updateTranslations(translations) {
+    /**
+     * 更新頁面上的翻譯結果
+     * 
+     * 參數:
+     *     translations (object): 翻譯結果，格式為 { article_id: chinese_text }
+     */
+    
+    Object.entries(translations).forEach(([articleId, chineseText]) => {
+        // 查找對應的卡片
+        const card = document.querySelector(`[data-article-id="${articleId}"]`);
+        
+        if (card) {
+            // 查找中文摘要容器
+            const chineseDescriptionElement = card.querySelector('.news-card-description-chinese');
+            
+            if (chineseDescriptionElement) {
+                // 更新文本
+                chineseDescriptionElement.textContent = chineseText;
+                
+                // 移除載入狀態樣式
+                chineseDescriptionElement.classList.remove('news-card-description-loading');
+                
+                console.log(`已更新翻譯: ${articleId.substring(0, 20)}...`);
+            }
+        }
+    });
 }
 
 // ========== 顯示新聞 ========== 
@@ -155,6 +274,7 @@ function displayNews(data) {
 function createNewsCard(article) {
     const card = document.createElement('div');
     card.className = 'news-card';
+    card.setAttribute('data-article-id', article.article_id);
     
     // 格式化發布時間
     const publishedDate = new Date(article.publishedAt);
@@ -180,6 +300,7 @@ function createNewsCard(article) {
         
         // 添加中文摘要
         if (article.chinese_description) {
+            // 如果已經有翻譯，直接顯示
             descriptionHTML += `
                 <div class="news-card-description-wrapper">
                     <div class="news-card-description-label-chinese">Chinese Summary (中文摘要)</div>
@@ -187,7 +308,7 @@ function createNewsCard(article) {
                 </div>
             `;
         } else {
-            // 如果沒有中文翻譯，顯示提示
+            // 如果還沒有翻譯，顯示「正在翻譯中...」
             descriptionHTML += `
                 <div class="news-card-description-wrapper">
                     <div class="news-card-description-label-chinese">Chinese Summary (中文摘要)</div>
