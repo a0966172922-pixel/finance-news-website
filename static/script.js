@@ -170,11 +170,30 @@ function createNewsCard(article) {
     let descriptionHTML = '';
     
     if (article.description) {
-        descriptionHTML += `<p class="news-card-description">${escapeHtml(article.description)}</p>`;
+        // 添加英文摘要
+        descriptionHTML += `
+            <div class="news-card-description-wrapper">
+                <div class="news-card-description-label">English Summary</div>
+                <p class="news-card-description">${escapeHtml(article.description)}</p>
+            </div>
+        `;
         
-        // 如果有中文翻譯，添加到下方
+        // 添加中文摘要
         if (article.chinese_description) {
-            descriptionHTML += `<p class="news-card-description-chinese">${escapeHtml(article.chinese_description)}</p>`;
+            descriptionHTML += `
+                <div class="news-card-description-wrapper">
+                    <div class="news-card-description-label-chinese">Chinese Summary (中文摘要)</div>
+                    <p class="news-card-description-chinese">${escapeHtml(article.chinese_description)}</p>
+                </div>
+            `;
+        } else {
+            // 如果沒有中文翻譯，顯示提示
+            descriptionHTML += `
+                <div class="news-card-description-wrapper">
+                    <div class="news-card-description-label-chinese">Chinese Summary (中文摘要)</div>
+                    <p class="news-card-description-chinese news-card-description-loading">正在翻譯中...</p>
+                </div>
+            `;
         }
     }
     

@@ -72,19 +72,26 @@ def translate_to_chinese(text):
         text (str): 要翻譯的英文文本
     
     返回:
-        str: 翻譯後的中文文本，或原文本（如果翻譯失敗）
+        str: 翻譯後的中文文本，或 None（如果翻譯失敗或不需要翻譯）
     """
     
-    if not text or not openai_client or not is_english(text):
+    if not text or not openai_client:
+        return None
+    
+    # 檢查是否是英文
+    if not is_english(text):
+        print(f"文本已是中文或不需要翻譯")
         return None
     
     try:
+        print(f"正在翻譯文本: {text[:50]}...")
+        
         response = openai_client.chat.completions.create(
             model="gpt-4.1-mini",
             messages=[
                 {
                     "role": "system",
-                    "content": "你是一個專業的翻譯助手。請將提供的英文文本翻譯成繁體中文，保持原意和專業性。只返回翻譯後的文本，不要添加任何額外說明。"
+                    "content": "你是一個專業的財經翻譯助手。請將提供的英文文本翻譯成繁體中文，保持原意、專業性和簡潔性。只返回翻譯後的文本，不要添加任何額外說明。"
                 },
                 {
                     "role": "user",
@@ -93,10 +100,12 @@ def translate_to_chinese(text):
             ],
             temperature=0.3,
             max_tokens=500,
-            timeout=5
+            timeout=10  # 增加超時時間
         )
         
-        return response.choices[0].message.content.strip()
+        translated = response.choices[0].message.content.strip()
+        print(f"翻譯成功: {translated[:50]}...")
+        return translated
     
     except Exception as e:
         print(f"翻譯錯誤: {str(e)}")
