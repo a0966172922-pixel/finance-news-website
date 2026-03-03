@@ -10,7 +10,7 @@ from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 import requests
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 from dotenv import load_dotenv
 import re
@@ -71,9 +71,6 @@ SUPPORTED_TOPICS = {
     'business': '商業',
     'economy': '經濟'
 }
-
-
-
 
 
 def is_article_relevant_to_country(article, country_code):
@@ -140,7 +137,11 @@ def get_news_from_gnews(country, topic='finance', max_articles=10):
     # 構建改進的搜尋查詢 - 包含國家名稱
     search_query = f"{country_english} {topic}"
     
-    print(f"搜尋查詢: {search_query}, 國家: {country}")
+    # 計算 30 天前的日期
+    from_date = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+    
+    print(f"搜尋查詢: {search_query}, 國家: {country}, 時間範圍: 最近 30 天")
+    print(f"新聞起始日期: {from_date}")
     
     # 構建查詢參數
     params = {
@@ -149,6 +150,7 @@ def get_news_from_gnews(country, topic='finance', max_articles=10):
         'lang': 'en',
         'max': min(max_articles * 2, 100),  # 獲取更多結果以進行過濾
         'sortby': 'publishedAt',
+        'from': from_date,  # 只抓取最近 30 天的新聞
         'apikey': API_KEY
     }
     
@@ -271,7 +273,6 @@ def get_news():
     status_code = 200 if result.get('success') else 400
     
     return jsonify(result), status_code
-
 
 
 @app.route('/api/countries', methods=['GET'])
