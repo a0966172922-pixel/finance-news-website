@@ -263,7 +263,7 @@ def get_news():
     # 獲取查詢參數
     country = request.args.get('country', '').lower()
     topic = request.args.get('topic', 'finance').lower()
-    max_articles = request.args.get('max', 10, type=int)
+    max_articles = request.args.get('max', 15, type=int)
     
     # 驗證必填參數
     if not country:
