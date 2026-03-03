@@ -13,10 +13,7 @@ import json
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
 import re
-import threading
-from concurrent.futures import ThreadPoolExecutor
 
 # 載入環境變數
 load_dotenv()
@@ -75,92 +72,9 @@ SUPPORTED_TOPICS = {
     'economy': '經濟'
 }
 
-# 初始化 OpenAI 客戶端用於翻譯
-try:
-    openai_client = OpenAI()
-except:
-    openai_client = None
 
-# 用於存儲翻譯結果的全域字典
-translation_cache = {}
 
-# 線程池用於並行翻譯
-executor = ThreadPoolExecutor(max_workers=5)
 
-def is_english(text):
-    """檢查文本是否主要是英文"""
-    if not text:
-        return False
-    
-    # 計算英文字符的比例
-    english_chars = sum(1 for c in text if ord(c) < 128 and c.isalpha())
-    chinese_chars = sum(1 for c in text if '\u4e00' <= c <= '\u9fff')
-    
-    # 如果中文字符較多，則認為已經是中文
-    if chinese_chars > english_chars:
-        return False
-    
-    return english_chars > 0
-
-def translate_to_chinese(text):
-    """
-    使用 OpenAI API 將英文文本翻譯成繁體中文
-    
-    參數:
-        text (str): 要翻譯的英文文本
-    
-    返回:
-        str: 翻譯後的中文文本，或 None（如果翻譯失敗或不需要翻譯）
-    """
-    
-    if not text or not openai_client:
-        return None
-    
-    # 檢查是否是英文
-    if not is_english(text):
-        return None
-    
-    try:
-        print(f"正在翻譯文本: {text[:50]}...")
-        
-        response = openai_client.chat.completions.create(
-            model="gpt-4.1-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "你是一個專業的財經翻譯助手。請將提供的英文文本翻譯成繁體中文，保持原意、專業性和簡潔性。只返回翻譯後的文本，不要添加任何額外說明。"
-                },
-                {
-                    "role": "user",
-                    "content": text[:500]  # 限制長度以節省 token
-                }
-            ],
-            temperature=0.3,
-            max_tokens=500,
-            timeout=10
-        )
-        
-        translated = response.choices[0].message.content.strip()
-        print(f"翻譯成功: {translated[:50]}...")
-        return translated
-    
-    except Exception as e:
-        print(f"翻譯錯誤: {str(e)}")
-        return None
-
-def translate_article_async(article_id, description):
-    """
-    在後台異步翻譯文章
-    
-    參數:
-        article_id (str): 文章的唯一標識符
-        description (str): 要翻譯的描述
-    """
-    if is_english(description):
-        translated = translate_to_chinese(description)
-        if translated:
-            translation_cache[article_id] = translated
-            print(f"翻譯已快取: {article_id}")
 
 def is_article_relevant_to_country(article, country_code):
     """
@@ -266,22 +180,9 @@ def get_news_from_gnews(country, topic='finance', max_articles=10):
             
             description = article.get('description', '')
             
-            # 生成文章的唯一 ID
-            article_id = f"{country}_{topic}_{idx}_{hash(article.get('title', ''))}"
-            
-            # 檢查是否已經翻譯過
-            chinese_description = translation_cache.get(article_id)
-            
-            # 如果是英文且還沒翻譯，在後台異步翻譯
-            if is_english(description) and not chinese_description:
-                # 提交異步翻譯任務
-                executor.submit(translate_article_async, article_id, description)
-            
             articles.append({
                 'title': article.get('title', ''),
                 'description': description,
-                'chinese_description': chinese_description,
-                'article_id': article_id,  # 用於前端輪詢時識別
                 'content': article.get('content', ''),
                 'url': article.get('url', ''),
                 'source': article.get('source', {}).get('name', 'Unknown'),
@@ -371,42 +272,7 @@ def get_news():
     
     return jsonify(result), status_code
 
-@app.route('/api/translations', methods=['GET'])
-def get_translations():
-    """
-    獲取翻譯結果的 API 端點
-    前端可以通過輪詢此端點來獲取最新的翻譯結果
-    
-    查詢參數:
-        - article_ids (必填): 逗號分隔的文章 ID 列表
-    
-    返回:
-        JSON 格式的翻譯結果
-    """
-    
-    article_ids_str = request.args.get('article_ids', '')
-    
-    if not article_ids_str:
-        return jsonify({
-            'success': False,
-            'error': '缺少必填參數: article_ids'
-        }), 400
-    
-    # 解析文章 ID 列表
-    article_ids = [id.strip() for id in article_ids_str.split(',')]
-    
-    # 獲取翻譯結果
-    translations = {}
-    for article_id in article_ids:
-        if article_id in translation_cache:
-            translations[article_id] = translation_cache[article_id]
-    
-    return jsonify({
-        'success': True,
-        'translations': translations,
-        'total_requested': len(article_ids),
-        'total_translated': len(translations)
-    }), 200
+
 
 @app.route('/api/countries', methods=['GET'])
 def get_countries():
