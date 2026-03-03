@@ -73,7 +73,10 @@ SUPPORTED_TOPICS = {
     'trade': '對外貿易',
     'export': '出口',
     'policy': '政策',
-    'industry': '產業'
+    'industry': '產業',
+    'international': '國際關係',
+    'geopolitics': '地緣政治',
+    'technology': '科技'
 }
 
 
