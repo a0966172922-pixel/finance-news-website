@@ -69,7 +69,11 @@ SUPPORTED_COUNTRIES = {
 SUPPORTED_TOPICS = {
     'finance': '財經',
     'business': '商業',
-    'economy': '經濟'
+    'economy': '經濟',
+    'trade': '對外貿易',
+    'export': '出口',
+    'policy': '政策',
+    'industry': '產業'
 }
 
 
